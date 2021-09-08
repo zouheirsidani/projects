@@ -56,7 +56,7 @@ def main_getoptions(RentBuy,budget):
         else:
             return ('Your buying options are: {}'.format(output))
         
-def return_EmployeeName(intent_request):
+def return_options(intent_request):
     """
     Performs dialog management and fulfillment for returning employee's department Name.
     """
@@ -87,7 +87,7 @@ def dispatch(intent_request):
     
     # Dispatch to your bot's intent handlers
     if intent_name == 'mainintent':
-        return return_EmployeeName(intent_request)
+        return return_options(intent_request)
     raise Exception('Intent with name ' + intent_name + ' not supported')
 
 """ --- Main handler --- """
