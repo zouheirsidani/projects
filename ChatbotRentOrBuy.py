@@ -41,7 +41,8 @@ def main_getoptions(RentBuy,budget):
         
     x=0 #row iterator
     output={}
-    
+    if RentBuy!='rent' and RentBuy!='buy':
+        return ("Wrong input")
     for i in rows:
         if rows[x][0] == RentBuy: 
             if rows[x][1]<=budget:
@@ -50,7 +51,7 @@ def main_getoptions(RentBuy,budget):
     if not output :
         return ("There are no options available at that budget")
     else:
-        if RentBuy==1:
+        if RentBuy=="rent":
             return ('Your rental options are: {}'.format(output))
         else:
             return ('Your buying options are: {}'.format(output))
@@ -59,7 +60,8 @@ def return_EmployeeName(intent_request):
     """
     Performs dialog management and fulfillment for returning employee's department Name.
     """
-    Department_id = intent_request['currentIntent']['slots']['DepartmentID']
+    RentBuy = intent_request['currentIntent']['slots']['RentOrBuy'].str.lower()
+    budget = intent_request['currentIntent']['slots']['Budget']
     source = intent_request['invocationSource']
     output_session_attributes = intent_request['sessionAttributes'] if intent_request['sessionAttributes'] is not None else {}
     
@@ -71,7 +73,7 @@ def return_EmployeeName(intent_request):
         'Fulfilled',
         {
             'contentType': 'PlainText',
-            'content': 'Hello! {}'.format(main_getoptions(Department_id))
+            'content': main_getoptions(RentBuy, budget)
         }
     )
 
