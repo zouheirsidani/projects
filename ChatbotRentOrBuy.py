@@ -30,7 +30,7 @@ def close(session_attributes, fulfillment_state, message):
 def main_getoptions(RentBuy,budget):
     s3=boto3.client("s3")
     filename='Rent_OR_Buy.csv'
-    fileObj = s3.get_object(Bucket = "demo-awslex", Key=filename)
+    fileObj = s3.get_object(Bucket = "rentbuychat", Key=filename)
     rows = fileObj['Body'].read().decode('utf-8').split('\r\n')
         
     reader = csv.reader(rows)
