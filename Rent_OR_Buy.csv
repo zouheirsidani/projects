@@ -1,0 +1,9 @@
+rent(1) or buy(2),monthly rent or downpayment (CAD),City,Address
+1,2000,Vancouver,condo1
+2,280000,Toronto,condo2
+1,900,Toronto,condo3
+1,4600,Vancouver,house1
+2,530000,Vancouver,house2
+2,70000,Toronto,condo4
+2,138000,Vancouver,condo5
+1,1750,Toronto,condo6
