@@ -60,7 +60,7 @@ def return_options(intent_request):
     """
     Performs dialog management and fulfillment for returning employee's department Name.
     """
-    RentBuy = intent_request['currentIntent']['slots']['RentOrBuy'].str.lower()
+    RentBuy = intent_request['currentIntent']['slots']['RentOrBuy'].lower()
     budget = intent_request['currentIntent']['slots']['Budget']
     source = intent_request['invocationSource']
     output_session_attributes = intent_request['sessionAttributes'] if intent_request['sessionAttributes'] is not None else {}
