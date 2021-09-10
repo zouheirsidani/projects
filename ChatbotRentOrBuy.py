@@ -9,6 +9,7 @@ import os
 import math
 import random
 import logging
+import pandas as pd 
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -25,40 +26,37 @@ def close(session_attributes, fulfillment_state, message):
     }
     return response
 
-""" --- Function that return employee name --- """
+""" --- Function that returns rental and buying options --- """
 
 def main_getoptions(RentBuy,budget):
     s3=boto3.client("s3")
     filename='Rent_OR_Buy.csv'
-    fileObj = s3.get_object(Bucket = "rentbuychat", Key=filename)
-    rows = fileObj['Body'].read().decode('utf-8').split('\r\n')
-        
-    reader = csv.reader(rows)
-    rows = []
-    header = next(reader)
-    for i in reader:
-        rows.append(i)
-        
-    x=0 #row iterator
-    output={}
+    bucket = "rentbuychat"
+    obj = s3.get_object(Bucket= bucket, Key= filename) 
+    df = pd.read_csv(obj['Body'])
+    
     if RentBuy!='rent' and RentBuy!='buy':
         return ("Wrong input")
-    for i in rows:
-        if rows[x][0] == RentBuy: 
-            if rows[x][1]<=budget:
-                output[rows[x][3]]=[rows[x][1],rows[x][2]]
-        x=x+1
-    if not output :
+    
+    output = ""
+    for index, row in df.iterrows():
+        if row['rent or buy']==RentBuy:
+            if int(row['monthly rent or downpayment (CAD)'])<=int(budget):
+                if len(output)==0:
+                    output+= row['Address']+" in "+row['City']+" for the price of: "+str(row['monthly rent or downpayment (CAD)'])+"CAD"
+                else:
+                    output+= ", "+row['Address']+" in "+row['City']+" for the price of: "+str(row['monthly rent or downpayment (CAD)'])+"CAD"
+    if len(output)==0 :
         return ("There are no options available at that budget")
     else:
         if RentBuy=="rent":
-            return ('Your rental options are: {}'.format(output))
+            return ('Your rental options are: '+output)
         else:
-            return ('Your buying options are: {}'.format(output))
+            return ('Your buying options are: '+output)
         
 def return_options(intent_request):
     """
-    Performs dialog management and fulfillment for returning employee's department Name.
+    Performs dialog management and fulfillment for returning the options.
     """
     RentBuy = intent_request['currentIntent']['slots']['RentOrBuy'].lower()
     budget = intent_request['currentIntent']['slots']['Budget']
@@ -68,6 +66,17 @@ def return_options(intent_request):
     if source == 'DialogCodeHook':
         # Perform basic validation on the supplied input slots.
         slots = intent_request['currentIntent']['slots']
+    # return {
+    #     "sessionAttributes": {},
+    #     "dialogAction": {
+    #         "type":"Close",
+    #         "fulfillmentState":"Fulfilled",
+    #         "message":{
+    #             "contentType":"PlainText",
+    #             "content":main_getoptions(RentBuy,budget)
+    #         }
+    #     }
+    # }
     return close(
         output_session_attributes,
         'Fulfilled',
@@ -96,8 +105,7 @@ def lambda_handler(event, context):
     Route the incoming request based on intent.
     The JSON body of the request is provided in the event slot.
     """
-    # By default, treat the user request as coming from the America/New_York time zone.
-    os.environ['TZ'] = 'America/New_York'
+    os.environ['TZ'] = 'America/Pacific'
     time.tzset()
     logger.debug('event.bot.name={}'.format(event['bot']['name']))
     return dispatch(event)
