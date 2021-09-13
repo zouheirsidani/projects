@@ -15,17 +15,16 @@ logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
 
-def close(session_attributes, fulfillment_state, message):
+def close(fulfillment_state, message):
     response = {
-        'sessionAttributes': session_attributes,
-        'dialogAction': {
-            'type': 'Close',
-            'fulfillmentState': fulfillment_state,
-            'message': message
+        "dialogAction": {
+            "type": "Close",
+            "fulfillmentState": fulfillment_state,
+            "message": message
         }
     }
     return response
-
+    
 """ --- Function that returns rental and buying options --- """
 
 def main_getoptions(RentBuy,budget):
@@ -58,46 +57,21 @@ def return_options(intent_request):
     """
     Performs dialog management and fulfillment for returning the options.
     """
-    RentBuy = intent_request['currentIntent']['slots']['RentOrBuy'].lower()
-    budget = intent_request['currentIntent']['slots']['Budget']
+    RentBuy = intent_request['interpretations'][0]['intent']['slots']['RentOrBuy']['value']['interpretedValue'].lower()
+    budget = intent_request['interpretations'][0]['intent']['slots']['Budget']['value']['interpretedValue']
     source = intent_request['invocationSource']
-    output_session_attributes = intent_request['sessionAttributes'] if intent_request['sessionAttributes'] is not None else {}
     
     if source == 'DialogCodeHook':
         # Perform basic validation on the supplied input slots.
-        slots = intent_request['currentIntent']['slots']
-    # return {
-    #     "sessionAttributes": {},
-    #     "dialogAction": {
-    #         "type":"Close",
-    #         "fulfillmentState":"Fulfilled",
-    #         "message":{
-    #             "contentType":"PlainText",
-    #             "content":main_getoptions(RentBuy,budget)
-    #         }
-    #     }
-    # }
+        slots = intent_request['interpretations'][0]['intent']['slots']
+   
     return close(
-        output_session_attributes,
-        'Fulfilled',
+        "Fulfilled",
         {
-            'contentType': 'PlainText',
-            'content': main_getoptions(RentBuy, budget)
+            "contentType": "PlainText",
+            "content": main_getoptions(RentBuy, budget)
         }
     )
-
-""" --- Intents --- """
-def dispatch(intent_request):
-    """
-    Called when the user specifies an intent for this bot.
-    """
-    logger.debug('dispatch intentName={}'.format(intent_request['currentIntent']['name']))
-    intent_name='mainintent'
-    
-    # Dispatch to your bot's intent handlers
-    if intent_name == 'mainintent':
-        return return_options(intent_request)
-    raise Exception('Intent with name ' + intent_name + ' not supported')
 
 """ --- Main handler --- """
 def lambda_handler(event, context):
@@ -108,4 +82,4 @@ def lambda_handler(event, context):
     os.environ['TZ'] = 'America/Pacific'
     time.tzset()
     logger.debug('event.bot.name={}'.format(event['bot']['name']))
-    return dispatch(event)
+    return return_options(event)
